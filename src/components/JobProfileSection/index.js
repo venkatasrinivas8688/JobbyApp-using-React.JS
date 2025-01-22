@@ -24,6 +24,28 @@ const employmentTypesList = [
     employmentTypeId: 'INTERNSHIP',
   },
 ]
+const locationList = [
+  {
+    label: 'Hyderabad',
+    locationId: 'HYDERABAD',
+  },
+  {
+    label: 'Bangalore',
+    locationId: 'BANGALORE',
+  },
+  {
+    label: 'Chennai',
+    locationId: 'CHENNAI',
+  },
+  {
+    label: 'Delhi',
+    locationId: 'DELHI',
+  },
+  {
+    label: 'Mumbai',
+    locationId: 'MUMBAI',
+  },
+]
 
 const salaryRangesList = [
   {
@@ -56,6 +78,7 @@ class JobProfileSection extends Component {
     jobsList: [],
     searchInput: '',
     employmentType: [],
+    location: [],
     salaryRange: 0,
     apiStatus: apiStatusConstants.initial,
   }
@@ -70,8 +93,10 @@ class JobProfileSection extends Component {
     })
 
     const jwtToken = Cookies.get('jwt_token')
-    const {salaryRange, employmentType, searchInput} = this.state
-    const url = `https://apis.ccbp.in/jobs?employment_type=${employmentType.join()}&minimum_package=${salaryRange}&search=${searchInput}`
+    const {salaryRange, employmentType, searchInput, location} = this.state
+    const url = `https://apis.ccbp.in/jobs?employment_type=${employmentType.join(
+      ',',
+    )}&location=${location.join()}&minimum_package=${salaryRange}&search=${searchInput}`
     const options = {
       headers: {
         Authorization: `Bearer ${jwtToken}`,
@@ -117,11 +142,27 @@ class JobProfileSection extends Component {
     this.setState({salaryRange: salary}, this.getJobDetails)
   }
 
-  changeEmploymentType = type => {
-    this.setState(
-      prev => ({employmentType: [...prev.employmentType, type]}),
-      this.getJobDetails,
-    )
+  changeLocation = typeId => {
+    const {location} = this.state
+    let updatedList = []
+    if (location.includes(typeId)) {
+      updatedList = location.filter(eachType => eachType !== typeId)
+    } else {
+      updatedList = [...updatedList, typeId]
+    }
+    this.setState({location: updatedList}, this.getJobDetails)
+  }
+
+  changeEmploymentType = typeId => {
+    const {employmentType} = this.state
+    let updatedList = []
+    if (employmentType.includes(typeId)) {
+      updatedList = employmentType.filter(eachType => eachType !== typeId)
+    } else {
+      updatedList = [...updatedList, typeId]
+    }
+
+    this.setState({employmentType: updatedList}, this.getJobDetails)
   }
 
   renderJobDetails = () => {
@@ -238,8 +279,10 @@ class JobProfileSection extends Component {
           <JobsFilterSection
             employmentTypesList={employmentTypesList}
             salaryRangesList={salaryRangesList}
+            locationList={locationList}
             changeEmploymentType={this.changeEmploymentType}
             changeSalaryRange={this.changeSalaryRange}
+            changeLocation={this.changeLocation}
             searchInput={searchInput}
             changeSearchInput={this.changeSearchInput}
             getJobDetails={this.getJobDetails}
